@@ -25,15 +25,15 @@ doc_lines = __doc__.split("\n")
 requires = ['opencmiss.utils']
 
 setup(
-    name='ZincPythonTools',
-    version='1.0.0',
+    name='opencmiss.zincwidgets',
+    version='1.0.1',
     author='H. Sorby',
     author_email='h.sorby@auckland.ac.nz',
     packages=['opencmiss', 'opencmiss.zincwidgets'],
     platforms=['any'],
-    url='http://pypi.python.org/pypi/ZincPythonTools/',
-    license='LICENSE.txt',
+    url='https://github.com/OpenCMISS-Bindings/ZincPythonTools',
+    license='Mozilla Public License 2.0 (MPL 2.0)',
     description=doc_lines[0],
     classifiers=filter(None, classifiers.split("\n")),
-    install_requires=requires,
+    requires=requires,
 )
