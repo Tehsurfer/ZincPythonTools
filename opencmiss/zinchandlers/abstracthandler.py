@@ -11,7 +11,7 @@ BUTTON_MAP = {QtCore.Qt.LeftButton: Sceneviewerinput.BUTTON_TYPE_LEFT,
 # Create a modifier map of Qt modifier keys to Zinc modifier keys
 def modifier_map(qt_modifiers):
     """
-    Return a Zinc Sceneviewerinput modifiers object that is created from
+    Return a Zinc scene viewer input modifiers object that is created from
     the Qt modifier flags passed in.
     """
     modifiers = Sceneviewerinput.MODIFIER_FLAG_NONE
@@ -24,6 +24,7 @@ def modifier_map(qt_modifiers):
 class AbstractHandler(object):
 
     def __init__(self):
+        self._scene_viewer = None
         self._zinc_sceneviewer = None
         self._ignore_mouse_events = False
 
@@ -33,8 +34,9 @@ class AbstractHandler(object):
     def set_ignore_mouse_events(self, value=True):
         self._ignore_mouse_events = value
 
-    def set_zinc_sceneviewer(self, sceneviewer):
-        self._zinc_sceneviewer = sceneviewer
+    def set_scene_viewer(self, scene_viewer):
+        self._scene_viewer = scene_viewer
+        self._zinc_sceneviewer = scene_viewer.get_zinc_sceneviewer()
 
     def enter(self):
         raise NotImplementedError()

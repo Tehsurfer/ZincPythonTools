@@ -7,7 +7,7 @@ from opencmiss.zinchandlers.abstracthandler import AbstractHandler
 class KeyActivatedHandler(AbstractHandler, ABC):
 
     def __init__(self, key_code):
-        super(KeyActivatedHandler, self).__init()
+        super(KeyActivatedHandler, self).__init__()
         self._key_code = key_code
 
     def get_key_code(self):
