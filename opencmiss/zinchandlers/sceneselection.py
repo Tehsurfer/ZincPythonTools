@@ -29,6 +29,7 @@ class SceneSelection(KeyActivatedHandler):
         super(SceneSelection, self).__init__(key_code)
         self._start_position = None
         self._selection_box = None
+        self._selection_box_description = [-1.0, -1.0, -1.0, -1.0]
 
         self._selection_mode = SelectionMode.NONE
         self._graphics_selection_mode = GraphicsSelectionMode.ANY
@@ -54,17 +55,8 @@ class SceneSelection(KeyActivatedHandler):
     def mouse_move_event(self, event):
         super(SceneSelection, self).mouse_move_event(event)
         if self._processing_mouse_events and self._selection_mode != SelectionMode.NONE:
-            x = event.x()
-            y = event.y()
-            x_diff = float(x - self._start_position[0])
-            y_diff = float(y - self._start_position[1])
-            if abs(x_diff) < 0.0001:
-                x_diff = 1
-            if abs(y_diff) < 0.0001:
-                y_diff = 1
-            x_off = float(self._start_position[0]) / x_diff + 0.5
-            y_off = float(self._start_position[1]) / y_diff + 0.5
-            self._add_update_selection_box(x_diff, y_diff, x_off, y_off)
+            self._update_selection_box_description(event.x(), event.y())
+            self._update_and_or_create_selection_box()
 
     def mouse_release_event(self, event):
         super(SceneSelection, self).mouse_release_event(event)
@@ -72,6 +64,7 @@ class SceneSelection(KeyActivatedHandler):
             self._remove_selection_box()
             x = event.x()
             y = event.y()
+            self._update_selection_box_description(x, y)
             # Construct a small frustum to look for nodes in.
             scene = self._zinc_sceneviewer.getScene()
             region = scene.getRegion()
@@ -177,6 +170,9 @@ class SceneSelection(KeyActivatedHandler):
             scene = self._zinc_sceneviewer.getScene()
             scene.setSelectionField(selection_group)
 
+    def get_selection_box_description(self):
+        return self._selection_box_description
+
     def get_selection_group(self):
         """
         :return: Valid current selection group field or None.
@@ -215,12 +211,28 @@ class SceneSelection(KeyActivatedHandler):
         scene.setSelectionField(selection_group)
         return selection_group
 
-    def _add_update_selection_box(self, x_diff, y_diff, x_off, y_off):
+    def _update_selection_box_description(self, x, y):
+        x_diff = float(x - self._start_position[0])
+        y_diff = float(y - self._start_position[1])
+        if abs(x_diff) < 0.0001:
+            x_diff = 1
+        if abs(y_diff) < 0.0001:
+            y_diff = 1
+        x_off = float(self._start_position[0]) / x_diff + 0.5
+        y_off = float(self._start_position[1]) / y_diff + 0.5
+        self._selection_box_description = [x_diff, y_diff, x_off, y_off]
+
+    def _update_and_or_create_selection_box(self):
         # Using a non-ideal workaround for creating a rubber band for selection.
         # This will create strange visual artifacts when using two scene viewers looking at
         # the same scene.  Waiting on a proper solution in the API.
         # Note if the standard glyphs haven't been defined then the
         # selection box will not be visible
+        x_diff = self._selection_box_description[0]
+        y_diff = self._selection_box_description[1]
+        x_off = self._selection_box_description[2]
+        y_off = self._selection_box_description[3]
+
         scene = self._zinc_sceneviewer.getScene()
         scene.beginChange()
         if self._selection_box is None:
