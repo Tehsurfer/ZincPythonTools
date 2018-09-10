@@ -1,0 +1,82 @@
+
+from PySideX import QtCore
+from opencmiss.zinc.sceneviewerinput import Sceneviewerinput
+
+# Create a button map of Qt mouse buttons to Zinc input buttons
+BUTTON_MAP = {QtCore.Qt.LeftButton: Sceneviewerinput.BUTTON_TYPE_LEFT,
+              QtCore.Qt.MidButton: Sceneviewerinput.BUTTON_TYPE_MIDDLE,
+              QtCore.Qt.RightButton: Sceneviewerinput.BUTTON_TYPE_RIGHT}
+
+
+# Create a modifier map of Qt modifier keys to Zinc modifier keys
+def modifier_map(qt_modifiers):
+    """
+    Return a Zinc Sceneviewerinput modifiers object that is created from
+    the Qt modifier flags passed in.
+    """
+    modifiers = Sceneviewerinput.MODIFIER_FLAG_NONE
+    if qt_modifiers & QtCore.Qt.SHIFT:
+        modifiers = modifiers | Sceneviewerinput.MODIFIER_FLAG_SHIFT
+
+    return modifiers
+
+
+class AbstractHandler(object):
+
+    def __init__(self):
+        self._zinc_sceneviewer = None
+        self._ignore_mouse_events = False
+
+    def get_mode(self):
+        return self.__class__.__name__
+
+    def set_ignore_mouse_events(self, value=True):
+        self._ignore_mouse_events = value
+
+    def set_zinc_sceneviewer(self, sceneviewer):
+        self._zinc_sceneviewer = sceneviewer
+
+    def enter(self):
+        raise NotImplementedError()
+
+    def leave(self):
+        raise NotImplementedError()
+
+    def mouse_press_event(self, event):
+        if self._ignore_mouse_events:
+            event.ignore()
+            return
+
+        event.accept()
+        if event.button() not in BUTTON_MAP:
+            return
+
+    def mouse_move_event(self, event):
+        if self._ignore_mouse_events:
+            event.ignore()
+            return
+
+        event.accept()
+
+    def mouse_release_event(self, event):
+        if self._ignore_mouse_events:
+            event.ignore()
+            return
+
+        event.accept()
+        if event.button() not in BUTTON_MAP:
+            return
+
+    def mouse_enter_event(self, event):
+        if self._ignore_mouse_events:
+            event.ignore()
+            return
+
+        event.accept()
+
+    def mouse_leave_event(self, event):
+        if self._ignore_mouse_events:
+            event.ignore()
+            return
+
+        event.accept()

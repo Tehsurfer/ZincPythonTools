@@ -14,12 +14,8 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # See the examples at https://svn.physiomeproject.org/svn/cmiss/zinc/bindings/trunk/python/ for further
 # information.
 
-try:
-    from PySide import QtCore, QtOpenGL
-except ImportError:
-    from PyQt4 import QtCore, QtOpenGL
+from PySide import QtCore, QtOpenGL
 
-# from opencmiss.zinc.glyph import Glyph
 from opencmiss.zinc.sceneviewer import Sceneviewer, Sceneviewerevent
 from opencmiss.zinc.sceneviewerinput import Sceneviewerinput
 from opencmiss.zinc.scenecoordinatesystem import \
@@ -28,6 +24,8 @@ from opencmiss.zinc.scenecoordinatesystem import \
 from opencmiss.zinc.field import Field
 from opencmiss.zinc.glyph import Glyph
 from opencmiss.zinc.result import RESULT_OK
+# import opencmiss.zinc.sceneviewer.Sceneviewer.PROJECTION_MODE_PARALLEL as PROJECTION_MODE_PARALLEL
+# import opencmiss.zinc.sceneviewer.Sceneviewer.PROJECTION_MODE_PERSPECTIVE as PROJECTION_MODE_PERSPECTIVE
 
 selection_group_name = 'cmiss_selection'
 
@@ -36,6 +34,7 @@ selection_group_name = 'cmiss_selection'
 button_map = {QtCore.Qt.LeftButton: Sceneviewerinput.BUTTON_TYPE_LEFT,
               QtCore.Qt.MidButton: Sceneviewerinput.BUTTON_TYPE_MIDDLE,
               QtCore.Qt.RightButton: Sceneviewerinput.BUTTON_TYPE_RIGHT}
+
 
 # Create a modifier map of Qt modifier keys to Zinc modifier keys
 def modifier_map(qt_modifiers):
@@ -50,7 +49,9 @@ def modifier_map(qt_modifiers):
     return modifiers
 # mapping from qt to zinc end
 
-SELECTION_RUBBERBAND_NAME = 'selection_rubberband'
+
+SELECTION_RUBBER_BAND_NAME = 'selection_rubber_band'
+
 
 # projectionMode start
 class ProjectionMode(object):
@@ -71,14 +72,6 @@ class SelectionMode(object):
 
 class SceneviewerWidget(QtOpenGL.QGLWidget):
     
-    try:
-        # PySide
-        graphicsInitialized = QtCore.Signal()
-    except AttributError:
-        # PyQt
-        graphicsInitialized = QtCore.pyqtSignal()
-    
-
     # Create a signal to notify when the sceneviewer is ready.
     graphicsInitialized = QtCore.Signal()
 
@@ -133,7 +126,8 @@ class SceneviewerWidget(QtOpenGL.QGLWidget):
         # From the scene viewer module we can create a scene viewer, we set up the
         # scene viewer to have the same OpenGL properties as the QGLWidget.
         sceneviewermodule = self._context.getSceneviewermodule()
-        self._sceneviewer = sceneviewermodule.createSceneviewer(Sceneviewer.BUFFERING_MODE_DOUBLE, Sceneviewer.STEREO_MODE_DEFAULT)
+        self._sceneviewer = sceneviewermodule.createSceneviewer(Sceneviewer.BUFFERING_MODE_DOUBLE,
+                                                                Sceneviewer.STEREO_MODE_DEFAULT)
         self._sceneviewer.setProjectionMode(Sceneviewer.PROJECTION_MODE_PERSPECTIVE)
         self._sceneviewer.setViewportSize(self.width(), self.height())
 
@@ -155,44 +149,44 @@ class SceneviewerWidget(QtOpenGL.QGLWidget):
         """
         If there is a selection group, clears it and removes it from scene.
         """
-        selectionGroup = self.getSelectionGroup()
-        if selectionGroup is not None:
-            selectionGroup.clear()
-            selectionGroup = Field()  # NULL
+        selection_group = self.getSelectionGroup()
+        if selection_group is not None:
+            selection_group.clear()
+            selection_group = Field()  # NULL
             scene = self._sceneviewer.getScene()
-            scene.setSelectionField(selectionGroup)
+            scene.setSelectionField(selection_group)
 
     def getSelectionGroup(self):
         """
         :return: Valid current selection group field or None.
         """
         scene = self._sceneviewer.getScene()
-        selectionGroup = scene.getSelectionField()
-        if selectionGroup.isValid():
-            selectionGroup = selectionGroup.castGroup()
-            if selectionGroup.isValid():
-                return selectionGroup
+        selection_group = scene.getSelectionField()
+        if selection_group.isValid():
+            selection_group = selection_group.castGroup()
+            if selection_group.isValid():
+                return selection_group
         return None
 
     def getOrCreateSelectionGroup(self):
-        selectionGroup = self.getSelectionGroup()
-        if selectionGroup is not None:
-            return selectionGroup
+        selection_group = self.getSelectionGroup()
+        if selection_group is not None:
+            return selection_group
         scene = self._sceneviewer.getScene()
         region = scene.getRegion()
         fieldmodule = region.getFieldmodule()
-        selectionGroup = fieldmodule.findFieldByName(selection_group_name)
-        if selectionGroup.isValid():
-            selectionGroup = selectionGroup.castGroup()
-            if selectionGroup.isValid():
-                selectionGroup.setManaged(False)
-        if not selectionGroup.isValid():
+        selection_group = fieldmodule.findFieldByName(selection_group_name)
+        if selection_group.isValid():
+            selection_group = selection_group.castGroup()
+            if selection_group.isValid():
+                selection_group.setManaged(False)
+        if not selection_group.isValid():
             fieldmodule.beginChange()
-            selectionGroup = fieldmodule.createFieldGroup()
-            selectionGroup.setName(selection_group_name)
+            selection_group = fieldmodule.createFieldGroup()
+            selection_group.setName(selection_group_name)
             fieldmodule.endChange()
-        scene.setSelectionField(selectionGroup)
-        return selectionGroup
+        scene.setSelectionField(selection_group)
+        return selection_group
 
     def setScene(self, scene):
         if self._sceneviewer is not None:

@@ -28,14 +28,14 @@ class AlignmentSceneviewerWidget(SceneviewerWidget):
             self._model.setStateAlign()
             event.setAccepted(True)
         else:
-           super(AlignmentSceneviewerWidget, self).keyPressEvent(event)
+            super(AlignmentSceneviewerWidget, self).keyPressEvent(event)
 
     def keyReleaseEvent(self, event):
         if (event.key() == QtCore.Qt.Key_A) and event.isAutoRepeat() is False:
             self._model.setStateAlign(False)
             event.setAccepted(True)
         else:
-           super(AlignmentSceneviewerWidget, self).keyReleaseEvent(event)
+            super(AlignmentSceneviewerWidget, self).keyReleaseEvent(event)
 
     def mousePressEvent(self, event):
         if self._active_button != QtCore.Qt.NoButton:
