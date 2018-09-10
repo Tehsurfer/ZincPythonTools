@@ -12,24 +12,27 @@ class SceneManipulation(AbstractHandler):
 
     def mouse_press_event(self, event):
         super(SceneManipulation, self).mouse_press_event(event)
-        scene_input = self._zinc_sceneviewer.createSceneviewerinput()
-        scene_input.setPosition(event.x(), event.y())
-        scene_input.setEventType(Sceneviewerinput.EVENT_TYPE_BUTTON_PRESS)
-        scene_input.setButtonType(BUTTON_MAP[event.button()])
-        scene_input.setModifierFlags(modifier_map(event.modifiers()))
-        self._zinc_sceneviewer.processSceneviewerinput(scene_input)
+        if self._processing_mouse_events:
+            scene_input = self._zinc_sceneviewer.createSceneviewerinput()
+            scene_input.setPosition(event.x(), event.y())
+            scene_input.setEventType(Sceneviewerinput.EVENT_TYPE_BUTTON_PRESS)
+            scene_input.setButtonType(BUTTON_MAP[event.button()])
+            scene_input.setModifierFlags(modifier_map(event.modifiers()))
+            self._zinc_sceneviewer.processSceneviewerinput(scene_input)
 
     def mouse_move_event(self, event):
         super(SceneManipulation, self).mouse_move_event(event)
-        scene_input = self._zinc_sceneviewer.createSceneviewerinput()
-        scene_input.setPosition(event.x(), event.y())
-        scene_input.setEventType(Sceneviewerinput.EVENT_TYPE_MOTION_NOTIFY)
-        self._zinc_sceneviewer.processSceneviewerinput(scene_input)
+        if self._processing_mouse_events:
+            scene_input = self._zinc_sceneviewer.createSceneviewerinput()
+            scene_input.setPosition(event.x(), event.y())
+            scene_input.setEventType(Sceneviewerinput.EVENT_TYPE_MOTION_NOTIFY)
+            self._zinc_sceneviewer.processSceneviewerinput(scene_input)
 
     def mouse_release_event(self, event):
         super(SceneManipulation, self).mouse_release_event(event)
-        scene_input = self._zinc_sceneviewer.createSceneviewerinput()
-        scene_input.setPosition(event.x(), event.y())
-        scene_input.setEventType(Sceneviewerinput.EVENT_TYPE_BUTTON_RELEASE)
-        scene_input.setButtonType(BUTTON_MAP[event.button()])
-        self._zinc_sceneviewer.processSceneviewerinput(scene_input)
+        if self._processing_mouse_events:
+            scene_input = self._zinc_sceneviewer.createSceneviewerinput()
+            scene_input.setPosition(event.x(), event.y())
+            scene_input.setEventType(Sceneviewerinput.EVENT_TYPE_BUTTON_RELEASE)
+            scene_input.setButtonType(BUTTON_MAP[event.button()])
+            self._zinc_sceneviewer.processSceneviewerinput(scene_input)

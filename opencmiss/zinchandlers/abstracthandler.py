@@ -27,6 +27,7 @@ class AbstractHandler(object):
         self._scene_viewer = None
         self._zinc_sceneviewer = None
         self._ignore_mouse_events = False
+        self._processing_mouse_events = False
 
     def get_mode(self):
         return self.__class__.__name__
@@ -45,13 +46,16 @@ class AbstractHandler(object):
         raise NotImplementedError()
 
     def mouse_press_event(self, event):
+        self._processing_mouse_events = False
         if self._ignore_mouse_events:
             event.ignore()
             return
 
-        event.accept()
         if event.button() not in BUTTON_MAP:
             return
+
+        event.accept()
+        self._processing_mouse_events = True
 
     def mouse_move_event(self, event):
         if self._ignore_mouse_events:
@@ -65,9 +69,10 @@ class AbstractHandler(object):
             event.ignore()
             return
 
-        event.accept()
         if event.button() not in BUTTON_MAP:
             return
+
+        event.accept()
 
     def mouse_enter_event(self, event):
         if self._ignore_mouse_events:

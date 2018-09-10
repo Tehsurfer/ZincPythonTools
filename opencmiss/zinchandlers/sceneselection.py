@@ -35,22 +35,25 @@ class SceneSelection(KeyActivatedHandler):
         self._selection_tolerance = 3.0
 
     def enter(self):
-        pass
+        self._selection_mode = SelectionMode.NONE
 
     def leave(self):
         pass
 
     def mouse_press_event(self, event):
         super(SceneSelection, self).mouse_press_event(event)
-        self._start_position = (event.x(), event.y())
-        if BUTTON_MAP[event.button()] == Sceneviewerinput.BUTTON_TYPE_LEFT:
-            self._selection_mode = SelectionMode.EXCLUSIVE
-        elif BUTTON_MAP[event.button()] == Sceneviewerinput.BUTTON_TYPE_RIGHT:
-            self._selection_mode = SelectionMode.ADDITIVE
+        if self._processing_mouse_events:
+            self._start_position = (event.x(), event.y())
+            if BUTTON_MAP[event.button()] == Sceneviewerinput.BUTTON_TYPE_LEFT:
+                self._selection_mode = SelectionMode.EXCLUSIVE
+            elif BUTTON_MAP[event.button()] == Sceneviewerinput.BUTTON_TYPE_RIGHT:
+                self._selection_mode = SelectionMode.ADDITIVE
+            else:
+                self._selection_mode = SelectionMode.NONE
 
     def mouse_move_event(self, event):
         super(SceneSelection, self).mouse_move_event(event)
-        if self._selection_mode != SelectionMode.NONE:
+        if self._processing_mouse_events and self._selection_mode != SelectionMode.NONE:
             x = event.x()
             y = event.y()
             x_diff = float(x - self._start_position[0])
@@ -65,7 +68,7 @@ class SceneSelection(KeyActivatedHandler):
 
     def mouse_release_event(self, event):
         super(SceneSelection, self).mouse_release_event(event)
-        if self._selection_mode != SelectionMode.NONE:
+        if self._processing_mouse_events and self._selection_mode != SelectionMode.NONE:
             self._remove_selection_box()
             x = event.x()
             y = event.y()
