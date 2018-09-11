@@ -258,8 +258,17 @@ class BaseSceneviewerWidget(QtOpenGL.QGLWidget, InteractionManager):
         """
         return self._get_nearest_graphic(x, y, Field.DOMAIN_TYPE_POINT)
 
-    def get_nearest_element_graphics(self):
+    def get_nearest_element_graphics(self, x, y):
+        self._scene_picker.setSceneviewerRectangle(self._sceneviewer, SCENECOORDINATESYSTEM_WINDOW_PIXEL_TOP_LEFT,
+                                                   x - self._selection_tolerance, y - self._selection_tolerance,
+                                                   x + self._selection_tolerance, y + self._selection_tolerance)
         return self._scene_picker.getNearestElementGraphics()
+
+    def get_nearest_element(self, x, y):
+        self._scene_picker.setSceneviewerRectangle(self._sceneviewer, SCENECOORDINATESYSTEM_WINDOW_PIXEL_TOP_LEFT,
+                                                   x - self._selection_tolerance, y - self._selection_tolerance,
+                                                   x + self._selection_tolerance, y + self._selection_tolerance)
+        return self._scene_picker.getNearestElement()
 
     def get_nearest_graphics_mesh_3d(self, x, y):
         return self._get_nearest_graphic(x, y, Field.DOMAIN_TYPE_MESH3D)
