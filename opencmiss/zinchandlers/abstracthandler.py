@@ -5,7 +5,8 @@ from opencmiss.zinc.sceneviewerinput import Sceneviewerinput
 # Create a button map of Qt mouse buttons to Zinc input buttons
 BUTTON_MAP = {QtCore.Qt.LeftButton: Sceneviewerinput.BUTTON_TYPE_LEFT,
               QtCore.Qt.MidButton: Sceneviewerinput.BUTTON_TYPE_MIDDLE,
-              QtCore.Qt.RightButton: Sceneviewerinput.BUTTON_TYPE_RIGHT}
+              QtCore.Qt.RightButton: Sceneviewerinput.BUTTON_TYPE_RIGHT,
+              QtCore.Qt.NoButton: None}
 
 
 # Create a modifier map of Qt modifier keys to Zinc modifier keys
