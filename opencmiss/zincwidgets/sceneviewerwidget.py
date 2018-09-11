@@ -14,9 +14,8 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # See the examples at https://svn.physiomeproject.org/svn/cmiss/zinc/bindings/trunk/python/ for further
 # information.
 
-from PySide2 import QtCore, QtOpenGL
+from PySideX import QtCore, QtOpenGL
 
-# from opencmiss.zinc.glyph import Glyph
 from opencmiss.zinc.sceneviewer import Sceneviewer, Sceneviewerevent
 from opencmiss.zinc.sceneviewerinput import Sceneviewerinput
 from opencmiss.zinc.scenecoordinatesystem import \
@@ -25,6 +24,8 @@ from opencmiss.zinc.scenecoordinatesystem import \
 from opencmiss.zinc.field import Field
 from opencmiss.zinc.glyph import Glyph
 from opencmiss.zinc.result import RESULT_OK
+# import opencmiss.zinc.sceneviewer.Sceneviewer.PROJECTION_MODE_PARALLEL as PROJECTION_MODE_PARALLEL
+# import opencmiss.zinc.sceneviewer.Sceneviewer.PROJECTION_MODE_PERSPECTIVE as PROJECTION_MODE_PERSPECTIVE
 
 selection_group_name = 'cmiss_selection'
 
@@ -37,10 +38,10 @@ button_map = {QtCore.Qt.LeftButton: Sceneviewerinput.BUTTON_TYPE_LEFT,
 
 # Create a modifier map of Qt modifier keys to Zinc modifier keys
 def modifier_map(qt_modifiers):
-    '''
+    """
     Return a Zinc Sceneviewerinput modifiers object that is created from
     the Qt modifier flags passed in.
-    '''
+    """
     modifiers = Sceneviewerinput.MODIFIER_FLAG_NONE
     if qt_modifiers & QtCore.Qt.SHIFT:
         modifiers = modifiers | Sceneviewerinput.MODIFIER_FLAG_SHIFT
@@ -50,6 +51,7 @@ def modifier_map(qt_modifiers):
 
 
 SELECTION_RUBBERBAND_NAME = 'selection_rubberband'
+SELECTION_RUBBER_BAND_NAME = 'selection_rubber_band'
 
 
 # projectionMode start
@@ -71,6 +73,7 @@ class SelectionMode(object):
 
 class SceneviewerWidget(QtOpenGL.QGLWidget):
     
+    # Create a signal to notify when the sceneviewer is ready.
     graphicsInitialized = QtCore.Signal()
 
     # init start
@@ -80,6 +83,7 @@ class SceneviewerWidget(QtOpenGL.QGLWidget):
         Call the super class init functions, set the  Zinc context and the scene viewer handle to None.
         Initialise other attributes that deal with selection and the rotation of the plane.
         """
+        QtOpenGL.QGLWidget.__init__(self, parent, shared)
         # Create a Zinc context from which all other objects can be derived either directly or indirectly.
         self._graphicsInitialized = False
         self._context = None
@@ -98,6 +102,7 @@ class SceneviewerWidget(QtOpenGL.QGLWidget):
         self._ignore_mouse_events = False
         self._selectionKeyPressed = False
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self._selection_position_start = None
         # init end
 
     def setContext(self, context):
@@ -123,7 +128,8 @@ class SceneviewerWidget(QtOpenGL.QGLWidget):
         # From the scene viewer module we can create a scene viewer, we set up the
         # scene viewer to have the same OpenGL properties as the QGLWidget.
         sceneviewermodule = self._context.getSceneviewermodule()
-        self._sceneviewer = sceneviewermodule.createSceneviewer(Sceneviewer.BUFFERING_MODE_DOUBLE, Sceneviewer.STEREO_MODE_DEFAULT)
+        self._sceneviewer = sceneviewermodule.createSceneviewer(Sceneviewer.BUFFERING_MODE_DOUBLE,
+                                                                Sceneviewer.STEREO_MODE_DEFAULT)
         self._sceneviewer.setProjectionMode(Sceneviewer.PROJECTION_MODE_PERSPECTIVE)
         self._sceneviewer.setViewportSize(self.width(), self.height())
 
@@ -142,47 +148,47 @@ class SceneviewerWidget(QtOpenGL.QGLWidget):
         self._sceneviewer.viewAll()
 
     def clearSelection(self):
-        '''
+        """
         If there is a selection group, clears it and removes it from scene.
-        '''
-        selectionGroup = self.getSelectionGroup()
-        if selectionGroup is not None:
-            selectionGroup.clear()
-            selectionGroup = Field()  # NULL
+        """
+        selection_group = self.getSelectionGroup()
+        if selection_group is not None:
+            selection_group.clear()
+            selection_group = Field()  # NULL
             scene = self._sceneviewer.getScene()
-            scene.setSelectionField(selectionGroup)
+            scene.setSelectionField(selection_group)
 
     def getSelectionGroup(self):
-        '''
+        """
         :return: Valid current selection group field or None.
-        '''
+        """
         scene = self._sceneviewer.getScene()
-        selectionGroup = scene.getSelectionField()
-        if selectionGroup.isValid():
-            selectionGroup = selectionGroup.castGroup()
-            if selectionGroup.isValid():
-                return selectionGroup
+        selection_group = scene.getSelectionField()
+        if selection_group.isValid():
+            selection_group = selection_group.castGroup()
+            if selection_group.isValid():
+                return selection_group
         return None
 
     def getOrCreateSelectionGroup(self):
-        selectionGroup = self.getSelectionGroup()
-        if selectionGroup is not None:
-            return selectionGroup
+        selection_group = self.getSelectionGroup()
+        if selection_group is not None:
+            return selection_group
         scene = self._sceneviewer.getScene()
         region = scene.getRegion()
         fieldmodule = region.getFieldmodule()
-        selectionGroup = fieldmodule.findFieldByName(selection_group_name)
-        if selectionGroup.isValid():
-            selectionGroup = selectionGroup.castGroup()
-            if selectionGroup.isValid():
-                selectionGroup.setManaged(False)
-        if not selectionGroup.isValid():
+        selection_group = fieldmodule.findFieldByName(selection_group_name)
+        if selection_group.isValid():
+            selection_group = selection_group.castGroup()
+            if selection_group.isValid():
+                selection_group.setManaged(False)
+        if not selection_group.isValid():
             fieldmodule.beginChange()
-            selectionGroup = fieldmodule.createFieldGroup()
-            selectionGroup.setName(selection_group_name)
+            selection_group = fieldmodule.createFieldGroup()
+            selection_group.setName(selection_group_name)
             fieldmodule.endChange()
-        scene.setSelectionField(selectionGroup)
-        return selectionGroup
+        scene.setSelectionField(selection_group)
+        return selection_group
 
     def setScene(self, scene):
         if self._sceneviewer is not None:
@@ -191,59 +197,59 @@ class SceneviewerWidget(QtOpenGL.QGLWidget):
             self.setSelectionfilter(self._selectionFilter)
 
     def getSceneviewer(self):
-        '''
+        """
         Get the scene viewer for this ZincWidget.
-        '''
+        """
         return self._sceneviewer
     
     def setSelectionModeAdditive(self):
         self._selectionAlwaysAdditive = True
 
     def setSelectionKeyHandling(self, state):
-        '''
+        """
         Set whether widget handles its own selection key events.
         :param state: True if widget handles selection key, false if not (i.e. pass to parent)
-        '''
+        """
         self._selectionKeyHandling = state
 
     def setSelectModeNode(self):
-        '''
+        """
         Set the selection mode to select *only* nodes.
-        '''
+        """
         self._nodeSelectMode = True
         self._dataSelectMode = False
         self._elemSelectMode = False
 
     def setSelectModeData(self):
-        '''
+        """
         Set the selection mode to select *only* datapoints.
-        '''
+        """
         self._nodeSelectMode = False
         self._dataSelectMode = True
         self._elemSelectMode = False
 
     def setSelectModeElement(self):
-        '''
+        """
         Set the selection mode to select *only* elements.
-        '''
+        """
         self._nodeSelectMode = False
         self._dataSelectMode = False
         self._elemSelectMode = True
 
     def setSelectModeAll(self):
-        '''
+        """
         Set the selection mode to select both nodes and elements.
-        '''
+        """
         self._nodeSelectMode = True
         self._dataSelectMode = True
         self._elemSelectMode = True
 
     # initializeGL start
     def initializeGL(self):
-        '''
+        """
         The OpenGL context is ready for use. If Zinc Context has been set, create Zinc Sceneviewer, otherwise
         inform client who is required to set Context at a later time.
-        '''
+        """
         self._graphicsInitialized = True
         if self._context:
             self._createSceneviewer()
@@ -292,9 +298,9 @@ class SceneviewerWidget(QtOpenGL.QGLWidget):
         self._scenepicker.setSceneviewerRectangle(self._sceneviewer, coordinate_system, left, bottom, right, top);
 
     def setSelectionfilter(self, scenefilter):
-        '''
+        """
         Set filter to be applied in logical AND with sceneviewer filter during selection
-        '''
+        """
         self._selectionFilter = scenefilter
         sceneviewerfilter = self._sceneviewer.getScenefilter()
         if self._selectionFilter is not None:
@@ -311,28 +317,28 @@ class SceneviewerWidget(QtOpenGL.QGLWidget):
         return self._selectionFilter
 
     def project(self, x, y, z):
-        '''
+        """
         Project the given point in global coordinates into window pixel coordinates
         with the origin at the window's top left pixel.
         Note the z pixel coordinate is a depth which is mapped so that -1 is
         on the far clipping plane, and +1 is on the near clipping plane.
-        '''
+        """
         in_coords = [x, y, z]
-        result, out_coords = self._sceneviewer.transformCoordinates(SCENECOORDINATESYSTEM_WORLD, SCENECOORDINATESYSTEM_WINDOW_PIXEL_TOP_LEFT, Scene(), in_coords)
+        result, out_coords = self._sceneviewer.transformCoordinates(SCENECOORDINATESYSTEM_WORLD, SCENECOORDINATESYSTEM_WINDOW_PIXEL_TOP_LEFT, self._sceneviewer.getScene(), in_coords)
         if result == RESULT_OK:
             return out_coords  # [out_coords[0] / out_coords[3], out_coords[1] / out_coords[3], out_coords[2] / out_coords[3]]
 
         return None
 
     def unproject(self, x, y, z):
-        '''
+        """
         Unproject the given point in window pixel coordinates where the origin is
         at the window's top left pixel into global coordinates.
         Note the z pixel coordinate is a depth which is mapped so that -1 is
         on the far clipping plane, and +1 is on the near clipping plane.
-        '''
+        """
         in_coords = [x, y, z]
-        result, out_coords = self._sceneviewer.transformCoordinates(SCENECOORDINATESYSTEM_WINDOW_PIXEL_TOP_LEFT, SCENECOORDINATESYSTEM_WORLD, Scene(), in_coords)
+        result, out_coords = self._sceneviewer.transformCoordinates(SCENECOORDINATESYSTEM_WINDOW_PIXEL_TOP_LEFT, SCENECOORDINATESYSTEM_WORLD, self._sceneviewer.getScene(), in_coords)
         if result == RESULT_OK:
             return out_coords  # [out_coords[0] / out_coords[3], out_coords[1] / out_coords[3], out_coords[2] / out_coords[3]]
 
@@ -364,11 +370,11 @@ class SceneviewerWidget(QtOpenGL.QGLWidget):
         return self._getNearestGraphic(x, y, Field.DOMAIN_TYPE_NODES)
 
     def getNearestGraphicsPoint(self, x, y):
-        '''
+        """
         Assuming given x and y is in the sending widgets coordinates 
         which is a parent of this widget.  For example the values given 
         directly from the event in the parent widget.
-        '''
+        """
         return self._getNearestGraphic(x, y, Field.DOMAIN_TYPE_POINT)
 
     def getNearestElementGraphics(self):
@@ -394,28 +400,28 @@ class SceneviewerWidget(QtOpenGL.QGLWidget):
         self._ignore_mouse_events = value
 
     def viewAll(self):
-        '''
+        """
         Helper method to set the current scene viewer to view everything
         visible in the current scene.
-        '''
+        """
         self._sceneviewer.viewAll()
 
     # paintGL start
     def paintGL(self):
-        '''
+        """
         Render the scene for this scene viewer.  The QGLWidget has already set up the
         correct OpenGL buffer for us so all we need do is render into it.  The scene viewer
         will clear the background so any OpenGL drawing of your own needs to go after this
         API call.
-        '''
+        """
         self._sceneviewer.renderScene()
         # paintGL end
 
     def _zincSceneviewerEvent(self, event):
-        '''
+        """
         Process a scene viewer event.  The updateGL() method is called for a
         repaint required event all other events are ignored.
-        '''
+        """
         if event.getChangeFlags() & Sceneviewerevent.CHANGE_FLAG_REPAINT_REQUIRED:
             QtCore.QTimer.singleShot(0, self.updateGL)
 
@@ -426,9 +432,9 @@ class SceneviewerWidget(QtOpenGL.QGLWidget):
 
     # resizeGL start
     def resizeGL(self, width, height):
-        '''
+        """
         Respond to widget resize events.
-        '''
+        """
         self._sceneviewer.setViewportSize(width, height)
         # resizeGL end
         
@@ -438,8 +444,7 @@ class SceneviewerWidget(QtOpenGL.QGLWidget):
             event.setAccepted(True)
         else:
             event.ignore()
-        
-            
+
     def keyReleaseEvent(self, event):
         if self._selectionKeyHandling and (event.key() == QtCore.Qt.Key_S) and event.isAutoRepeat() == False:
             self._selectionKeyPressed = False
@@ -448,22 +453,25 @@ class SceneviewerWidget(QtOpenGL.QGLWidget):
             event.ignore()
 
     def mousePressEvent(self, event):
-        '''
+        """
         Handle a mouse press event in the scene viewer.
-        '''
+        """
         self._use_zinc_mouse_event_handling = False  # Track when zinc should be handling mouse events
         if self._ignore_mouse_events:
             event.ignore()
             return
 
         event.accept()
+        if event.button() not in button_map:
+            return
+        
         self._selection_position_start = (event.x(), event.y())
 
-        if button_map[event.button()] == Sceneviewerinput.BUTTON_TYPE_LEFT and self._selectionKeyPressed and (self._nodeSelectMode or self._elemSelectMode):
+        if button_map[event.button()] == Sceneviewerinput.BUTTON_TYPE_LEFT\
+                and self._selectionKeyPressed and (self._nodeSelectMode or self._elemSelectMode):
             self._selection_mode = SelectionMode.EXCLUSIVE
             if event.modifiers() & QtCore.Qt.SHIFT:
                 self._selection_mode = SelectionMode.ADDITIVE
-
         else:
             scene_input = self._sceneviewer.createSceneviewerinput()
             scene_input.setPosition(event.x(), event.y())
@@ -474,13 +482,17 @@ class SceneviewerWidget(QtOpenGL.QGLWidget):
             self._use_zinc_mouse_event_handling = True
 
     def mouseReleaseEvent(self, event):
-        '''
+        """
         Handle a mouse release event in the scene viewer.
-        '''
+        """
         if self._ignore_mouse_events:
             event.ignore()
             return
         event.accept()
+
+        if event.button() not in button_map:
+            return
+
         if self._selection_mode != SelectionMode.NONE:
             self._removeSelectionBox()
             x = event.x()
@@ -580,10 +592,10 @@ class SceneviewerWidget(QtOpenGL.QGLWidget):
             self._sceneviewer.processSceneviewerinput(scene_input)
 
     def mouseMoveEvent(self, event):
-        '''
+        """
         Handle a mouse move event in the scene viewer.
         Behaviour depends on modes set in original mouse press event.
-        '''
+        """
         if self._ignore_mouse_events:
             event.ignore()
             return
