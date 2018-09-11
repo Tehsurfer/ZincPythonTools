@@ -83,7 +83,6 @@ class SceneviewerWidget(QtOpenGL.QGLWidget):
         Call the super class init functions, set the  Zinc context and the scene viewer handle to None.
         Initialise other attributes that deal with selection and the rotation of the plane.
         """
-        QtOpenGL.QGLWidget.__init__(self, parent, shared)
         # Create a Zinc context from which all other objects can be derived either directly or indirectly.
         self._graphicsInitialized = False
         self._context = None
