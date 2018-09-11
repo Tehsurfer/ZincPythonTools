@@ -50,7 +50,6 @@ def modifier_map(qt_modifiers):
 # mapping from qt to zinc end
 
 
-SELECTION_RUBBERBAND_NAME = 'selection_rubberband'
 SELECTION_RUBBER_BAND_NAME = 'selection_rubber_band'
 
 
