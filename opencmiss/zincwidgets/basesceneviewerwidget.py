@@ -234,6 +234,13 @@ class BaseSceneviewerWidget(QtOpenGL.QGLWidget, InteractionManager):
     def set_tumble_rate(self, rate):
         self._sceneviewer.setTumbleRate(rate)
 
+    def get_picking_volume_centre(self):
+        result, centre = self._scene_picker.getPickingVolumeCentre()
+        if result == RESULT_OK:
+            return centre
+
+        return None
+
     def _get_nearest_graphic(self, x, y, domain_type):
         self._scene_picker.setSceneviewerRectangle(self._sceneviewer, SCENECOORDINATESYSTEM_WINDOW_PIXEL_TOP_LEFT,
                                                    x - self._selection_tolerance, y - self._selection_tolerance,
