@@ -146,7 +146,7 @@ class BaseSceneviewerWidget(QtOpenGL.QGLWidget, InteractionManager):
         result, eye, lookat, up = self._sceneviewer.getLookatParameters()
         if result == RESULT_OK:
             angle = self._sceneviewer.getViewAngle()
-            return (eye, lookat, up, angle)
+            return eye, lookat, up, angle
 
         return None
 
@@ -169,7 +169,7 @@ class BaseSceneviewerWidget(QtOpenGL.QGLWidget, InteractionManager):
         self._scene_picker = scenepicker
 
     def set_picking_rectangle(self, coordinate_system, left, bottom, right, top):
-        self._scene_picker.setSceneviewerRectangle(self._sceneviewer, coordinate_system, left, bottom, right, top);
+        self._scene_picker.setSceneviewerRectangle(self._sceneviewer, coordinate_system, left, bottom, right, top)
 
     def set_selectionfilter(self, scene_filter):
         """
@@ -202,7 +202,8 @@ class BaseSceneviewerWidget(QtOpenGL.QGLWidget, InteractionManager):
                                                                     SCENECOORDINATESYSTEM_WINDOW_PIXEL_TOP_LEFT,
                                                                     self._sceneviewer.getScene(), in_coords)
         if result == RESULT_OK:
-            return out_coords  # [out_coords[0] / out_coords[3], out_coords[1] / out_coords[3], out_coords[2] / out_coords[3]]
+            # [out_coords[0] / out_coords[3], out_coords[1] / out_coords[3], out_coords[2] / out_coords[3]]
+            return out_coords
 
         return None
 
@@ -218,14 +219,15 @@ class BaseSceneviewerWidget(QtOpenGL.QGLWidget, InteractionManager):
                                                                     SCENECOORDINATESYSTEM_WORLD,
                                                                     self._sceneviewer.getScene(), in_coords)
         if result == RESULT_OK:
-            return out_coords  # [out_coords[0] / out_coords[3], out_coords[1] / out_coords[3], out_coords[2] / out_coords[3]]
+            # [out_coords[0] / out_coords[3], out_coords[1] / out_coords[3], out_coords[2] / out_coords[3]]
+            return out_coords
 
         return None
 
     def get_viewport_size(self):
         result, width, height = self._sceneviewer.getViewportSize()
         if result == RESULT_OK:
-            return (width, height)
+            return width, height
 
         return None
 
@@ -234,8 +236,8 @@ class BaseSceneviewerWidget(QtOpenGL.QGLWidget, InteractionManager):
 
     def _get_nearest_graphic(self, x, y, domain_type):
         self._scene_picker.setSceneviewerRectangle(self._sceneviewer, SCENECOORDINATESYSTEM_WINDOW_PIXEL_TOP_LEFT,
-                                                   x - self._selection_tolerance, y - self._selection_tolerance, x + self._selection_tolerance,
-                                                   y + self._selection_tolerance)
+                                                   x - self._selection_tolerance, y - self._selection_tolerance,
+                                                   x + self._selection_tolerance, y + self._selection_tolerance)
         nearest_graphics = self._scene_picker.getNearestGraphics()
         if nearest_graphics.isValid() and nearest_graphics.getFieldDomainType() == domain_type:
             return nearest_graphics
@@ -259,16 +261,16 @@ class BaseSceneviewerWidget(QtOpenGL.QGLWidget, InteractionManager):
     def get_nearest_element_graphics(self):
         return self._scene_picker.getNearestElementGraphics()
 
-    def get_nearest_graphics_mesh_3D(self, x, y):
+    def get_nearest_graphics_mesh_3d(self, x, y):
         return self._get_nearest_graphic(x, y, Field.DOMAIN_TYPE_MESH3D)
 
-    def get_nearest_graphics_mesh_2D(self, x, y):
+    def get_nearest_graphics_mesh_2d(self, x, y):
         return self._get_nearest_graphic(x, y, Field.DOMAIN_TYPE_MESH2D)
 
     def get_nearest_node(self, x, y):
         self._scene_picker.setSceneviewerRectangle(self._sceneviewer, SCENECOORDINATESYSTEM_WINDOW_PIXEL_TOP_LEFT,
-                                                   x - self._selection_tolerance, y - self._selection_tolerance, x + self._selection_tolerance,
-                                                   y + self._selection_tolerance)
+                                                   x - self._selection_tolerance, y - self._selection_tolerance,
+                                                   x + self._selection_tolerance, y + self._selection_tolerance)
         node = self._scene_picker.getNearestNode()
 
         return node
