@@ -20,6 +20,17 @@ class InteractionManager(object):
             self._fallback_handler = handler
             self._active_handler = handler
 
+    def unregister_handler(self, handler):
+        if handler != self._fallback_handler:
+            self._handlers.pop(handler.get_mode())
+
+            if hasattr(handler, 'get_key_code'):
+                key_code = handler.get_key_code()
+                self._key_code_handler_map.pop(key_code)
+
+            if self._active_handler == handler:
+                self._active_handler = self._fallback_handler
+
     def set_fallback_handler(self, fallback_handler):
         self._fallback_handler = fallback_handler
 

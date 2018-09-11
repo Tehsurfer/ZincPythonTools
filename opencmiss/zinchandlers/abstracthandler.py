@@ -37,7 +37,10 @@ class AbstractHandler(object):
 
     def set_scene_viewer(self, scene_viewer):
         self._scene_viewer = scene_viewer
-        self._zinc_sceneviewer = scene_viewer.get_zinc_sceneviewer()
+        if self._scene_viewer.is_graphics_initialized():
+            self._graphics_ready()
+        else:
+            self._scene_viewer.graphics_initialized.connect(self._graphics_ready)
 
     def enter(self):
         raise NotImplementedError()
@@ -87,3 +90,6 @@ class AbstractHandler(object):
             return
 
         event.accept()
+
+    def _graphics_ready(self):
+        self._zinc_sceneviewer = self._scene_viewer.get_zinc_sceneviewer()

@@ -127,6 +127,9 @@ class BaseSceneviewerWidget(QtOpenGL.QGLWidget, InteractionManager):
             self._create_sceneviewer()
         self.graphics_initialized.emit()
 
+    def is_graphics_initialized(self):
+        return self._graphics_initialized
+
     def set_projection_mode(self, mode):
         if mode == ProjectionMode.PARALLEL:
             self._sceneviewer.setProjectionMode(Sceneviewer.PROJECTION_MODE_PARALLEL)
