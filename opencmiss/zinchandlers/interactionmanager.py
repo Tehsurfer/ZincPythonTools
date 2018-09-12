@@ -35,9 +35,10 @@ class InteractionManager(object):
         self._fallback_handler = fallback_handler
 
     def _change_handler_to(self, new_handler):
-        self._active_handler.leave()
-        self._active_handler = new_handler
-        self._active_handler.enter()
+        if new_handler != self._active_handler:
+            self._active_handler.leave()
+            self._active_handler = new_handler
+            self._active_handler.enter()
 
     def key_press_event(self, event):
         if event.key() in self._key_code_handler_map and not event.isAutoRepeat():
