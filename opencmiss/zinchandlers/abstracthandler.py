@@ -92,5 +92,11 @@ class AbstractHandler(object):
 
         event.accept()
 
+    def key_press_event(self, event):
+        event.ignore()
+
+    def key_release_event(self, event):
+        event.ignore()
+
     def _graphics_ready(self):
         self._zinc_sceneviewer = self._scene_viewer.get_zinc_sceneviewer()
