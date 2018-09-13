@@ -4,6 +4,7 @@ class InteractionManager(object):
 
     def __init__(self):
         self._handlers = {}
+        self._key_listeners = {}
         self._key_code_handler_map = {}
         self._active_handler = None
         self._fallback_handler = None
@@ -31,6 +32,19 @@ class InteractionManager(object):
             if self._active_handler == handler:
                 self._active_handler = self._fallback_handler
 
+    def register_key_listener(self, key_code, listener):
+        """
+        Register a callback function 'listener' to be called when the key described by 'key_code' is released.
+        Handler key codes take precedence over key listeners.
+        :param key_code:
+        :param listener: A callable that takes no parameters.
+        :return:
+        """
+        self._key_listeners[key_code] = listener
+
+    def unregister_key_listener(self, key_code):
+        self._key_listeners.pop(key_code)
+
     def set_fallback_handler(self, fallback_handler):
         self._fallback_handler = fallback_handler
 
@@ -44,6 +58,8 @@ class InteractionManager(object):
         if event.key() in self._key_code_handler_map and not event.isAutoRepeat():
             event.accept()
             self._change_handler_to(self._key_code_handler_map[event.key()])
+        elif event.key() in self._key_listeners:
+            pass
         else:
             self._active_handler.key_press_event(event)
 
@@ -51,6 +67,8 @@ class InteractionManager(object):
         if event.key() in self._key_code_handler_map and not event.isAutoRepeat():
             event.accept()
             self._change_handler_to(self._fallback_handler)
+        elif event.key() in self._key_listeners:
+            self._key_listeners[event.key()]()
         else:
             self._active_handler.key_release_event(event)
 
