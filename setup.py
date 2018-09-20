@@ -32,7 +32,7 @@ setup(
     url='https://github.com/OpenCMISS-Bindings/ZincPythonTools',
     license='Mozilla Public License 2.0 (MPL 2.0)',
     description=doc_lines[0],
-    classifiers=[],#filter(None, classifiers.split("\n")),
+    classifiers=filter(None, classifiers.split("\n")),
     install_requires=requires,
     zip_safe=False,
     use_scm_version=True,
