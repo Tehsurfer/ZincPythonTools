@@ -25,7 +25,6 @@ requires = ['PySide', 'opencmiss.utils', 'PySideX']
 
 setup(
     name='opencmiss.zincwidgets',
-    # version=version,
     author='H. Sorby',
     author_email='h.sorby@auckland.ac.nz',
     packages=['opencmiss', 'opencmiss.zincwidgets', 'opencmiss.zinchandlers'],
@@ -33,8 +32,8 @@ setup(
     url='https://github.com/OpenCMISS-Bindings/ZincPythonTools',
     license='Mozilla Public License 2.0 (MPL 2.0)',
     description=doc_lines[0],
-    classifiers=filter(None, classifiers.split("\n")),
-    requires=requires,
+    classifiers=[],#filter(None, classifiers.split("\n")),
+    install_requires=requires,
     zip_safe=False,
     use_scm_version=True,
     setup_requires=['setuptools_scm'],

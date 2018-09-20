@@ -1,0 +1,2 @@
+opencmiss.utils>=0.1.4
+-e git+https://github.com/hsorby/PySideX#egg=PySideX
